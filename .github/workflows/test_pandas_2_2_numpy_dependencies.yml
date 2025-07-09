@@ -52,5 +52,5 @@ jobs:
                     ls
                     echo "ls terminated"
                     echo "start import test"
-                    conda run -m import_pandas.py
+                    conda run -n test_env python import_pandas.py
                     echo "Pytest done"
