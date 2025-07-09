@@ -1,4 +1,4 @@
-name: Test Pandas=2.2 Numpy dependencies
+name: Test Pandas=2.1 Numpy dependencies
 on: 
   workflow_dispatch:
     inputs:
