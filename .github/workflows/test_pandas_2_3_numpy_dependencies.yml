@@ -28,7 +28,7 @@ jobs:
                 miniforge-version: latest
                 channels: conda-forge,nodefaults
                 activate-environment: test_env
-                conda-remove-defaults: "true"  
+                conda-remove-defaults: true 
             - name: Checkout
               uses: actions/checkout@v4
               with:
@@ -41,7 +41,7 @@ jobs:
               run: |
                     ls
                     echo "LS Done"
-                    mamba env create -c conda-forge -c nodefaults -n test_env pandas=${{ matrix.pandas_version }} numpy=${{ matrix.pandas_version }}
+                    mamba env create -c conda-forge -c nodefaults -n test_env pandas=${{ matrix.pandas_version }} numpy=${{ matrix.numpy_version }}
                     echo "Installation done"
                     conda list -n test_env
                     echo "libraries printed" 
