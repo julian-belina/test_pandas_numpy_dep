@@ -19,8 +19,8 @@ jobs:
             matrix:
                 # https://docs.github.com/en/actions/how-tos/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow
                 os: ["ubuntu-latest","ubuntu-22.04", "macos-latest","macos-13","windows-latest","windows-2022"]              
-                pandas_version: ["2.3"]
-                numpy_version: ["1.23.5","1.23.4","1.23.3","1.23.2","1.23.1","1.23.0","1.22.4","1.22.3","1.22.2","1.22.1","1.22.0"]
+                pandas_version: ["2.2"]
+                numpy_version: ["1.22.3","1.22.4"]
         steps:
             - name: Setup Conda
               uses: conda-incubator/setup-miniconda@v3
@@ -48,9 +48,9 @@ jobs:
             - name: Run pandas import test
               shell: pwsh
               run: |
-                  echo "Start ls"
-                  ls
-                  echo "ls terminated"
-                  echo "start import test"
-                  conda run -m import_pandas.py
-                  echo "Pytest done"
+                    echo "Start ls"
+                    ls
+                    echo "ls terminated"
+                    echo "start import test"
+                    conda run -m import_pandas.py
+                    echo "Pytest done"
