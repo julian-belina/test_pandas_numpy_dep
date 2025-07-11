@@ -77,3 +77,13 @@ jobs:
           run: |
             outcomes="$(cat */outcome | jq -c --slurp .)"
             echo outcomes=$outcomes >> $GITHUB_OUTPUT
+
+    print-output:
+      needs: collect
+      runs-on:  ubuntu-latest
+      if: ${{ !cancelled() }}
+      strategy:
+        matrix:
+          include: ${{ fromJSON(needs.collect.outputs.outcomes) }}
+      steps:
+      - run: echo ${{ matrix.runner }} ${{ matrix.outcome }}
