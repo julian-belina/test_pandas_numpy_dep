@@ -1,0 +1,89 @@
+# name: Test Pandas=2.3 Numpy dependencies
+# on: 
+#   workflow_dispatch:
+#     inputs:
+#       tags:
+#         description: 'Manual run' 
+#   push:
+#     branches: 
+#       - main
+
+#   # Allows to trigger the workflow manually
+    
+# jobs:
+#     TestPandasNumpyDependencies:
+#         name: numpy=${{ matrix.numpy_version }},${{ matrix.os }},pandas=${{ matrix.pandas_version }}
+#         runs-on: ${{ matrix.os }}
+#         continue-on-error: true
+#         strategy:
+#             fail-fast: false
+#             matrix:
+#                 numpy_version: ["1.22.4","1.22.3"]  
+#               # https://docs.github.com/en/actions/how-tos/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow
+#                 os: ["ubuntu-latest","ubuntu-22.04", "macos-latest","macos-13","windows-latest","windows-2022"]              
+#                 pandas_version: ["2.3.0","2.3.1"]
+                
+#         steps:
+#             - name: Setup Conda
+#               uses: conda-incubator/setup-miniconda@v3
+#               with:
+#                 miniforge-version: latest
+#                 channels: conda-forge,nodefaults
+#                 activate-environment: test_env
+#                 conda-remove-defaults: true 
+#             - name: Checkout
+#               uses: actions/checkout@v4
+#               with:
+#                 repository: julian-belina/test_pandas_numpy_dep
+#                 fetch-depth: 0   
+#                 ref: main        
+#             - name: Install libraries
+#               shell: pwsh
+#               id: install-step
+#               run: |
+#                     ls
+#                     echo "LS Done"
+#                     mamba env create -c conda-forge -c nodefaults -n test_env pandas=${{ matrix.pandas_version }} numpy=${{ matrix.numpy_version }}
+#                     echo "Installation done"
+#                     conda list -n test_env
+#                     echo "libraries printed" 
+#             - if: ${{ !cancelled() }}
+#               run: |
+#                 jq -cn  --arg os ${{ matrix.os }} --arg numpy_version ${{ matrix.numpy_version }} --arg pandas_version ${{ matrix.pandas_version }} --arg outcome ${{ steps.install-step.outcome }} '$ARGS.named' > outcome
+#             - if: ${{ !cancelled() }}
+#               uses: actions/upload-artifact@v4
+#               with:
+#                 name: ${{ hashFiles('outcome') }}
+#                 path: outcome
+              
+#             - name: Run pandas import test
+#               shell: pwsh
+#               run: |
+#                   echo "Start ls"
+#                   ls
+#                   echo "ls terminated"
+#                   echo "start import test"
+#                   conda run -n test_env python import_pandas.py
+#                   echo "Pytest done"  
+#     collect:
+#       needs: TestPandasNumpyDependencies
+#       runs-on:  ubuntu-latest
+#       if: ${{ !cancelled() }}
+#       outputs:
+#         outcomes: ${{ steps.collect.outputs.outcomes }}
+#       steps:
+#         - uses: actions/download-artifact@v4
+#         - id: collect
+#           run: |
+#             outcomes="$(cat */outcome | jq -c --slurp .)"
+#             echo outcomes=$outcomes >> $GITHUB_OUTPUT
+
+#     print-output:
+#       needs: collect
+#       runs-on:  ubuntu-latest
+#       if: ${{ !cancelled() }}
+#       strategy:
+#         matrix:
+#           include: ${{ fromJSON(needs.collect.outputs.outcomes) }}
+#       steps:
+#       - run: echo ${{ matrix.runner }} ${{ matrix.outcome }}
