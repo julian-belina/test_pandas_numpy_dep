@@ -1,5 +1,6 @@
-name: Test Pandas=2.2 Numpy dependencies
-on:   workflow_dispatch:
+name: Test Pandas=2.3 Numpy dependencies
+on: 
+  workflow_dispatch:
     inputs:
       tags:
         description: 'Manual run' 
