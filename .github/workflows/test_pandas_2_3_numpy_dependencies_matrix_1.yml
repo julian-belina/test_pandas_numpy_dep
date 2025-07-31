@@ -81,6 +81,10 @@ jobs:
             echo "New Line"
             echo $outcomes
             echo "End New Line"
+            echo "New Line"
+            echo $outcomes | jq -c '.[]'
+            echo "End New Line"
+            
 
     # print-output:
     #   needs: collect
