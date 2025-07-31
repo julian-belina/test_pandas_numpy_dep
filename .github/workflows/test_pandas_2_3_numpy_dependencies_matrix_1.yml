@@ -79,7 +79,7 @@ jobs:
             outcomes="$(cat */outcome | jq -c --slurp .)"
             echo outcomes=$outcomes >> $GITHUB_OUTPUT
             echo "New Line"
-            echo outcomes
+            echo $GITHUB_OUTPUT
             echo "End New Line"
 
     # print-output:
