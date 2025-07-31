@@ -1,90 +1,90 @@
-name: Test Pandas=2.3 Numpy dependencies
-on: 
-  workflow_dispatch:
-    inputs:
-      tags:
-        description: 'Manual run' 
-  push:
-    branches: 
-      - main
+# name: Test Pandas=2.3 Numpy dependencies
+# on: 
+#   workflow_dispatch:
+#     inputs:
+#       tags:
+#         description: 'Manual run' 
+#   push:
+#     branches: 
+#       - main
 
-  # Allows to trigger the workflow manually
-# https://github.com/marketplace/actions/matrix-output
-jobs:
-    build:
-        name: numpy=${{ matrix.numpy_version }},${{ matrix.os }},pandas=${{ matrix.pandas_version }}
-        permissions:
-          actions: read
-          contents: read
-        runs-on: ${{ matrix.os }}
-        continue-on-error: true
-        strategy:
-            fail-fast: false
-            matrix:
-                numpy_version: ["1.22.4","1.22.3"]  
-              # https://docs.github.com/en/actions/how-tos/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow
-                # os: ["ubuntu-latest","ubuntu-22.04", "macos-latest","macos-13","windows-latest","windows-2022"]              
-                os: ["ubuntu-latest"]
-                # pandas_version: ["2.3.0","2.3.1"]
-                pandas_version: ["2.3.0"]
-        outputs:
-          json: ${{ steps.matrix-output.outputs.json }}                
-        steps:
-            - uses: docker/build-push-action@v6
-              id: build-push
-              with:
-                tags: ${{ matrix.build.repo }}:latest
-                push: true
-            - name: Setup Conda
-              uses: conda-incubator/setup-miniconda@v3
-              with:
-                miniforge-version: latest
-                channels: conda-forge,nodefaults
-                activate-environment: test_env
-                conda-remove-defaults: true 
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                repository: julian-belina/test_pandas_numpy_dep
-                fetch-depth: 0   
-                ref: main        
-            - name: Install libraries
-              shell: pwsh
-              id: install-step
-              run: |
-                    ls
-                    echo "LS Done"
-                    mamba env create -c conda-forge -c nodefaults -n test_env pandas=${{ matrix.pandas_version }} numpy=${{ matrix.numpy_version }}
-                    echo "Installation done"
-                    conda list -n test_env
-                    echo "libraries printed"           
+#   # Allows to trigger the workflow manually
+# # https://github.com/marketplace/actions/matrix-output
+# jobs:
+#     build:
+#         name: numpy=${{ matrix.numpy_version }},${{ matrix.os }},pandas=${{ matrix.pandas_version }}
+#         permissions:
+#           actions: read
+#           contents: read
+#         runs-on: ${{ matrix.os }}
+#         continue-on-error: true
+#         strategy:
+#             fail-fast: false
+#             matrix:
+#                 numpy_version: ["1.22.4","1.22.3"]  
+#               # https://docs.github.com/en/actions/how-tos/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow
+#                 # os: ["ubuntu-latest","ubuntu-22.04", "macos-latest","macos-13","windows-latest","windows-2022"]              
+#                 os: ["ubuntu-latest"]
+#                 # pandas_version: ["2.3.0","2.3.1"]
+#                 pandas_version: ["2.3.0"]
+#         outputs:
+#           json: ${{ steps.matrix-output.outputs.json }}                
+#         steps:
+#             - uses: docker/build-push-action@v6
+#               id: build-push
+#               with:
+#                 tags: ${{ matrix.build.repo }}:latest
+#                 push: true
+#             - name: Setup Conda
+#               uses: conda-incubator/setup-miniconda@v3
+#               with:
+#                 miniforge-version: latest
+#                 channels: conda-forge,nodefaults
+#                 activate-environment: test_env
+#                 conda-remove-defaults: true 
+#             - name: Checkout
+#               uses: actions/checkout@v4
+#               with:
+#                 repository: julian-belina/test_pandas_numpy_dep
+#                 fetch-depth: 0   
+#                 ref: main        
+#             - name: Install libraries
+#               shell: pwsh
+#               id: install-step
+#               run: |
+#                     ls
+#                     echo "LS Done"
+#                     mamba env create -c conda-forge -c nodefaults -n test_env pandas=${{ matrix.pandas_version }} numpy=${{ matrix.numpy_version }}
+#                     echo "Installation done"
+#                     conda list -n test_env
+#                     echo "libraries printed"           
               
-            - name: Run pandas import test
-              shell: pwsh
-              run: |
-                  echo "Start ls"
-                  ls
-                  echo "ls terminated"
-                  echo "start import test"
-                  conda run -n test_env python import_pandas.py
-                  echo "Pytest done"  
-            - name: Last
-              uses: beacon-biosignals/matrix-output@v1
-              id: matrix-output
-              with:
-                yaml: |
-                  name: ${{ matrix.build.name }}
-                  image: ${{ matrix.build.repo }}@${{ steps.build-push.outputs.digest }}
-    test:
-      name: Test ${{ matrix.build.name }}
-      needs: build
-      runs-on: ubuntu-latest
-      container:
-        image: ${{ matrix.build.image }}
-      strategy:
-        fail-fast: false
-        matrix:
-          build: ${{ fromJSON(needs.build.outputs.json) }}
-      steps:
-        - run: echo done
-        - run: echo ${{ steps.build.outputs.json }}
+#             - name: Run pandas import test
+#               shell: pwsh
+#               run: |
+#                   echo "Start ls"
+#                   ls
+#                   echo "ls terminated"
+#                   echo "start import test"
+#                   conda run -n test_env python import_pandas.py
+#                   echo "Pytest done"  
+#             - name: Last
+#               uses: beacon-biosignals/matrix-output@v1
+#               id: matrix-output
+#               with:
+#                 yaml: |
+#                   name: ${{ matrix.build.name }}
+#                   image: ${{ matrix.build.repo }}@${{ steps.build-push.outputs.digest }}
+#     test:
+#       name: Test ${{ matrix.build.name }}
+#       needs: build
+#       runs-on: ubuntu-latest
+#       container:
+#         image: ${{ matrix.build.image }}
+#       strategy:
+#         fail-fast: false
+#         matrix:
+#           build: ${{ fromJSON(needs.build.outputs.json) }}
+#       steps:
+#         - run: echo done
+#         - run: echo ${{ steps.build.outputs.json }}
